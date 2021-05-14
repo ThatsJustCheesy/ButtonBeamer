@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>ButtonBeamer</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 16px Helvetica, Arial, sans-serif; }
+      
+      #input { position: fixed; top: 0; width: 100%; height: 8vh; line-height: 8vh; background-color: #0F7AFE; text-align: center; color: #fff; border-bottom: 2px solid #000; }
+      #input:focus-within .instructions { display: none; }
+      #input:focus-within .status::after { content: "Beaming your input…"; }
+      #input:hover { background-color: #0F6AFE; }
+      #input:focus-within { background-color: #0FA4FE; }
+      
+      #messages { position: fixed; top: 8vh; bottom: 60px; width: 100%; overflow: scroll; list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      
+      .message-form { position: fixed; bottom: 12px; width: 100%; padding: 0 3px 0 3px; }
+      .message-form * { border: 1px solid #000; }
+      .message-form input { padding: 10px; width: 90%; margin-right: -10px; margin-left: 10px; font-size: 16px; border-radius: 8px 0 0 8px; }
+      .message-form button { width: 9%; background: #0FC4FE; padding: 10px; font-size: 16px; color: #000; border-radius: 0 8px 8px 0; }
+      .message-form button:active { color: #fff; }
+     </style>
+  </head>
+  <body>
+    <div id="input" tabindex="0">
+      <div class="instructions">Click here to beam your input</div>
+      <div class="status"></div>
+    </div>
+    <ul id="messages"></ul>
+    <form class="message-form" action="">
+      <input id="m" autocomplete="off" placeholder="Type a message…"/>
+      <button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- <script src="/client/client.js"></script> -->
+    <script>
+      $(function() {
+        var socket = io();
+        $('.message-form').submit(function(e) {
+          e.preventDefault();
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
+        });
+        $('#input').keydown(function(e) {
+          e.preventDefault();
+          socket.volatile.emit('input', {type: 'keydown', code: e.code, name: e.key});
+          return false;
+        });
+        $('#input').keyup(function(e) {
+          e.preventDefault();
+          socket.volatile.emit('input', {type: 'keyup', code: e.code, name: e.key});
+          return false;
+        });
+  
+        function pushMessage(message, css) {
+          if (!css) css = {};
+          $('#messages')
+            .append($('<li>').text(message).css(css))
+            .scrollTop(function() { return this.scrollHeight; });
+        }
+        socket.on('connect', function() {
+          pushMessage("you've connected.", {color: 'green'});
+        });
+        socket.on('disconnect', function(reason) {
+          pushMessage("📵 you've been disconnected: " + reason + ".", {color: 'red'});
+        });
+        socket.on('user connected', function(username) {
+          pushMessage(username + ' connected.');
+        });
+        socket.on('user disconnected', function(username) {
+          pushMessage(username + ' disconnected.');
+        });
+        socket.on('chat message', function(chatMessage) {
+          pushMessage(chatMessage.username + ': ' + chatMessage.content);
+        });
+        socket.on('nickname change', function(nicknameChange) {
+          pushMessage("user '" + nicknameChange.oldName + "' changed nickname to '" + nicknameChange.newName + "'.");
+        });
+      });
+    </script>
+  </body>
+</html>
