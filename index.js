@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
     }
   });
   
-  outSocket.send(Buffer.from('hotplug 1 classic'));
+  outSocket.send(Buffer.from('hotplug 1 nunchuk'));
 });
 
 http.listen(port, () => {
@@ -70,4 +70,5 @@ outSocket.on('connect', (err) => {
   console.log(`Relaying to UNIX socket at ${outSocketPath}`);
 });
 
+console.log(`Attempting to connect to UNIX socket at ${outSocketPath}`);
 outSocket.connect(outSocketPath);
