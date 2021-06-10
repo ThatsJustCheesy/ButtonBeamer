@@ -12,7 +12,7 @@ ButtonBeamer is the front half of a Wii remote control app. The back half is [rn
 
 ### Prerequisites
 
-* Wii console (Wii Us don't work at the moment)
+* Wii or Wii U console
 * Basic command-line skills
 * Linux system with Bluetooth hardware and Node.js installed
 * To use over the Internet, a forwarded IPv4 port
@@ -20,16 +20,19 @@ ButtonBeamer is the front half of a Wii remote control app. The back half is [rn
 ### Instructions
 
 * Create/navigate to an appropriate scratch space directory.
-* `git clone --depth=1 https://github.com/ThatsJustCheesy/ButtonBeamer`
-* `git clone --depth=1 -b socket-input https://github.com/ThatsJustCheesy/WiimoteEmulator`
-* `cd WiimoteEmulator` and set up WiimoteEmulator as per [the instructions](https://github.com/rnconrad/WiimoteEmulator#buildinstall). Pair it with your Wii console and note down the Wii's Bluetooth address.
-* Run `./wmemulator <wii-bluetooth-address> unix /tmp/wmemulator_input`
-* Go to the ButtonBeamer directory (`cd ../ButtonBeamer`).
-* `npm install`
-* Choose a port to run on, e.g., `8080`. Then run `export PORT=<your-port> OUTPUT_SOCKET_PATH=/tmp/wmemulator_input`, or put each assignment on a separate line in a file named `.env`.
-* `npm start`
-* Navigate to `http://<your-hostname>:<your-port>`. To access the page from the machine it's hosted on, `<your-hostname>` is `localhost`; otherwise, it's the local IP address of the host machine.
-* Click in the blue region at the top of the page, and (for instance) use arrow keys to move the Classic Controller cursor. (The controls are presently hardcoded to an MKWii configuration, which you can view in [keycode_to_message.js](keycode_to_message.js).)
+* Download ButtonBeamer and WiimoteEmulator: `git clone --recursive --depth=1 --shallow-submodules https://github.com/ThatsJustCheesy/ButtonBeamer`
+* `cd ButtonBeamer`
+* Install ButtonBeamer's dependencies: `npm install`
+* Run this once to install WiimoteEmulator's dependencies with apt and build WiimoteEmulator: `./build.sh install-dependencies`.
+  * If you don't use apt, run that anyway, and it will tell you what to install manually. Then re-run as `./build.sh` to actually build.
+* Run this before running ButtonBeamer whenever you restart your machine: `./setup.sh`. This starts the custom `bluetoothd` service that WiimoteEmulator requires. To restore your regular `bluetoothd`, run `sudo killall bluetoothd && sudo systemctl start bluetooth`.
+* Run `./start ( <wii-bluetooth-address> | pair ) <port>`, substituting arguments as appropriate.
+  * The first time, specify `pair`, which has WiimoteEmulator search for a Wii or Wii U console to pair with. In the future, specify your console's Bluetooth address (`<wii-bluetooth-address>`) to connect directly to it.
+  * For `<port>`, choose some port to run the web server on, e.g., `8080`.
+  * An example `start` command to get you started: `./start pair 8080`.
+* Follow WiimoteEmulator's directions and wait for it to connect. Once a connection is established, press Enter to start ButtonBeamer.
+* Navigate your browser to `http://<your-hostname>:<the-port-you-chose>`. To access the page from the machine it's hosted on, `<your-hostname>` is `localhost`; otherwise, it's the local IP address of the machine.
+* Click in the blue region at the top of the page to beam your input. Use `/help` in the chat window to list all available client commands. In particular, use `/map-list` to see the current list of key-to-input mappings, and use `/map` to add or change them. (The default keymap is for Mario Kart 8.)
 
 ## Is it broken? Have a suggestion?
 
