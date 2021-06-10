@@ -1,0 +1,3 @@
+[submodule "WiimoteEmulator"]
+	path = WiimoteEmulator
+	url = https://github.com/ThatsJustCheesy/WiimoteEmulator
